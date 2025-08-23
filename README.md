@@ -1,26 +1,33 @@
-# CodecPlus
+<div align="center">
+<h2>
+    CodecHub: A Unified Library for Codec Models
+</h2>
+<div>
+    <div align="center">
+    <img width="400" alt="CodecHub Logo" src="assets/logo.png" style="max-width: 100%; height: auto;">
+</div>
+</div>
+<div>
+    <a href="https://github.com/Vyvo-Labs/VyvoTTS" target="_blank">
+        <img src="https://img.shields.io/github/stars/Vyvo-Labs/CodecHub?style=for-the-badge&color=FF6B6B&labelColor=2D3748" alt="GitHub stars">
+    </a>
+    <a href="https://github.com/Vyvo-Labs/CodecHub/blob/main/LICENSE" target="_blank">
+        <img src="https://img.shields.io/badge/License-MIT-4ECDC4?style=for-the-badge&labelColor=2D3748" alt="MIT License">
+    </a>
+    <a href="https://python.org" target="_blank">
+        <img src="https://img.shields.io/badge/Python-3.8+-45B7D1?style=for-the-badge&logo=python&logoColor=white&labelColor=2D3748" alt="Python 3.8+">
+    </a>
+    <a href="https://huggingface.co/spaces/Vyvo/CodecHub" target="_blank">
+        <img src="https://img.shields.io/badge/🤗_Hugging_Face-Spaces-FFD93D?style=for-the-badge&labelColor=2D3748" alt="HuggingFace Spaces">
+    </a>
+</div>
+</div
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org)
-
-CodecPlus is a comprehensive audio codec library that implements various state-of-the-art audio codec models without external dependencies. The library is designed to be modular, easy to use, and extend.
-
-## Features
-
-- Pure Python implementation of audio codec models
-- Includes multiple codec implementations:
-  - WavTokenizer: Audio tokenization model
-  - DAC: Descript Audio Codec
-- Easy-to-use API for encoding and decoding audio
-- Comprehensive utilities for audio processing
-
-## Installation
+## Install
 
 ```bash
-# From source
-git clone https://github.com/kadirnar/CodecPlus.git
-cd CodecPlus
-pip install -e .
+uv venv --python 3.10
+uv pip install -e .
 ```
 
 ## Usage
@@ -29,54 +36,31 @@ pip install -e .
 from codecplus import load_codec
 from codecplus.utils import load_audio, save_audio
 
-# Load audio file
-audio, sr = load_audio('path/to/audio.wav')
+# Load audio
+audio, sr = load_audio('input.wav')
 
-# Using WavTokenizer
-wav_tokenizer = load_codec('wav_tokenizer')
-tokens = wav_tokenizer.encode(audio)
-reconstructed_audio = wav_tokenizer.decode(tokens)
+# WavTokenizer
+tokenizer = load_codec('wav_tokenizer')
+tokens = tokenizer.encode(audio)
+output = tokenizer.decode(tokens)
 
-# Using DAC (Descript Audio Codec)
-dac = load_codec('dac', sample_rate=44100)
+# DAC
+dac = load_codec('dac')
 latents = dac.encode(audio)
-reconstructed_audio = dac.decode(latents)
+output = dac.decode(latents)
 
-# Save processed audio
-save_audio(reconstructed_audio, 'path/to/output.wav', sr)
+# Save output
+save_audio(output, 'output.wav', sr)
 ```
 
-## Documentation
 
-For more detailed documentation, examples, and API references, see the [documentation](docs/).
+## 🙏 Acknowledgements
 
-## Examples
+We would like to thank the following projects and teams that made this work possible:
 
-Explore the [notebooks](notebooks/) directory for interactive examples and tutorials.
+- [WavTokenizer](https://github.com/jishengpeng/WavTokenizer)
+- [DAC](https://github.com/descriptinc/descript-audio-codec)
 
-## Project Structure
-
-```
-codecplus/
-├── __init__.py             # Main package initialization
-├── codecs/                 # Codec implementations
-│   ├── __init__.py
-│   ├── base.py             # Base codec classes
-│   ├── wav_tokenizer/      # WavTokenizer implementation
-│   │   ├── __init__.py
-│   │   └── model.py
-│   └── dac/                # Descript Audio Codec
-│       ├── __init__.py
-│       └── model.py
-└── utils/                  # Utility functions
-    ├── __init__.py
-    └── audio.py            # Audio processing utilities
-```
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.

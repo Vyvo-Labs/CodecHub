@@ -45,8 +45,8 @@ Documentation = "https://github.com/kadirnar/CodecPlus"
 Repository = "https://github.com/kadirnar/CodecPlus"
 Issues = "https://github.com/kadirnar/CodecPlus/issues"
 
-[tool.setuptools_scm]
-write_to = "codecplus/_version.py"
+[tool.setuptools.dynamic]
+version = {attr = "codecplus.__version__"}
 
 [tool.black]
 line-length = 88
