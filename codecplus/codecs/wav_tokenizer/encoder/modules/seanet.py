@@ -10,11 +10,8 @@ import typing as tp
 import numpy as np
 import torch.nn as nn
 
-from codecplus.codecs.wav_tokenizer.encoder.modules import (
-    SLSTM,
-    SConv1d,
-    SConvTranspose1d,
-)
+from codecplus.codecs.wav_tokenizer.encoder.modules.conv import SConv1d, SConvTranspose1d
+from codecplus.codecs.wav_tokenizer.encoder.modules.lstm import SLSTM
 
 
 class SEANetResnetBlock(nn.Module):

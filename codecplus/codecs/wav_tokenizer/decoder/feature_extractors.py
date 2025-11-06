@@ -5,8 +5,8 @@ import torchaudio
 from torch import nn
 
 from codecplus.codecs.wav_tokenizer.decoder.modules import safe_log
-from codecplus.codecs.wav_tokenizer.encoder import EncodecModel
-from codecplus.codecs.wav_tokenizer.encoder.modules import SEANetDecoder, SEANetEncoder
+from codecplus.codecs.wav_tokenizer.encoder.model import EncodecModel
+from codecplus.codecs.wav_tokenizer.encoder.modules.seanet import SEANetDecoder, SEANetEncoder
 from codecplus.codecs.wav_tokenizer.encoder.quantization import ResidualVectorQuantizer
 
 

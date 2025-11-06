@@ -1,5 +1,5 @@
 # WavTokenizer inference config
-# Model: small, frame75 (hop_length=320, n_fft=1280)
+# Model: large, frame40 (hop_length=320, n_fft=1280)
 
 model:
   init_args:

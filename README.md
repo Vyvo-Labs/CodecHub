@@ -32,6 +32,8 @@ uv pip install -e .
 
 ## Usage
 
+### WavTokenizer Codec
+
 ```python
 from codecplus import load_codec
 from codecplus.utils import load_audio, save_audio
@@ -39,18 +41,24 @@ from codecplus.utils import load_audio, save_audio
 # Load audio
 audio, sr = load_audio('input.wav')
 
-# WavTokenizer
-tokenizer = load_codec('wav_tokenizer')
-tokens = tokenizer.encode(audio)
-output = tokenizer.decode(tokens)
+# Download and load WavTokenizer from HuggingFace
+tokenizer = load_codec(model_name='wav_tokenizer', hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')
 
-# DAC
-dac = load_codec('dac')
-latents = dac.encode(audio)
-output = dac.decode(latents)
+# Encode and decode
+features, discrete_codes = tokenizer.encode(audio)
+output = tokenizer.decode(features)
 
 # Save output
 save_audio(output, 'output.wav', sr)
+```
+
+### DAC Codec
+
+```python
+# Load DAC codec
+dac = load_codec('dac', sample_rate=44100)
+latents = dac.encode(audio)
+output = dac.decode(latents)
 ```
 
 

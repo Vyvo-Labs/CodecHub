@@ -3,7 +3,7 @@ from typing import Any, Dict, Tuple, Union
 
 import torch
 import yaml
-from huggingface_hub import hf_hub_download
+from huggingface_hub import hf_hub_download, list_repo_files
 from torch import nn
 
 from codecplus.codecs.wav_tokenizer.decoder.feature_extractors import (
@@ -67,20 +67,88 @@ class WavTokenizer(nn.Module):
         return model
 
     @classmethod
-    def from_pretrained(self, repo_id: str) -> "WavTokenizer":
+    def from_pretrained(cls, repo_id: str) -> "WavTokenizer":
         """Class method to create a new Vocos model instance from a pre-trained model stored in the Hugging
         Face model hub.
+
+        Args:
+            repo_id: The Hugging Face repository ID
+
+        Returns:
+            WavTokenizer: The loaded model instance
+
+        Note:
+            This method searches for config files with .yaml or .yml extensions
+            and model files with .ckpt or .bin extensions in the repository.
+            It supports both old and new config formats automatically.
         """
-        config_path = hf_hub_download(repo_id=repo_id, filename="config.yaml")
-        model_path = hf_hub_download(repo_id=repo_id, filename="pytorch_model.bin")
-        model = self.from_hparams(config_path)
+        # List all files in the repository
+        repo_files = list_repo_files(repo_id=repo_id)
+
+        # Find config file (.yaml or .yml)
+        config_file = None
+        for file in repo_files:
+            if file.endswith('.yaml') or file.endswith('.yml'):
+                config_file = file
+                break
+
+        if config_file is None:
+            raise ValueError(f"No config file (.yaml or .yml) found in repository {repo_id}")
+
+        # Find model checkpoint file (.ckpt or .bin)
+        model_file = None
+        for file in repo_files:
+            if file.endswith('.ckpt') or file.endswith('.bin'):
+                model_file = file
+                break
+
+        if model_file is None:
+            raise ValueError(f"No model file (.ckpt or .bin) found in repository {repo_id}")
+
+        # Download files
+        config_path = hf_hub_download(repo_id=repo_id, filename=config_file)
+        model_path = hf_hub_download(repo_id=repo_id, filename=model_file)
+
+        # Load config to check format
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+
+        # Determine config format and load model accordingly
+        if "model" in config and "init_args" in config["model"]:
+            # New format: use from_hparams0802
+            model = cls.from_hparams0802(config_path)
+        else:
+            # Old format: use from_hparams
+            model = cls.from_hparams(config_path)
+
+        # Load checkpoint
         state_dict = torch.load(model_path, map_location="cpu")
-        if isinstance(model.feature_extractor, EncodecFeatures):
+
+        # Handle .ckpt format (PyTorch Lightning checkpoint)
+        if model_file.endswith('.ckpt'):
+            if 'state_dict' in state_dict:
+                state_dict_raw = state_dict['state_dict']
+                # Filter only relevant keys for the model
+                state_dict = {}
+                for k, v in state_dict_raw.items():
+                    if (
+                        k.startswith("backbone.")
+                        or k.startswith("head.")
+                        or k.startswith("feature_extractor.")
+                    ):
+                        state_dict[k] = v
+            else:
+                # If no 'state_dict' key, assume the checkpoint is already in the correct format
+                pass
+
+        # For .bin format with old config, add encodec parameters
+        if model_file.endswith('.bin') and isinstance(model.feature_extractor, EncodecFeatures):
             encodec_parameters = {
                 "feature_extractor.encodec." + key: value
                 for key, value in model.feature_extractor.encodec.state_dict().items()
             }
             state_dict.update(encodec_parameters)
+
         model.load_state_dict(state_dict)
         model.eval()
         return model
@@ -173,39 +241,80 @@ class WavTokenizer(nn.Module):
         return model
 
     @torch.inference_mode()
-    def forward(self, audio_input: torch.Tensor, **kwargs: Any) -> torch.Tensor:
+    def forward(self, audio_input: torch.Tensor, bandwidth_id: torch.Tensor = None, **kwargs: Any) -> torch.Tensor:
         """
         Method to run a copy-synthesis from audio waveform. The feature extractor first processes the audio
         input, which is then passed through the backbone and the head to reconstruct the audio output.
 
         Args:
-            audio_input (Tensor): The input tensor representing the audio waveform of shape (B, T),
-                                        where B is the batch size and L is the waveform length.
-
+            audio_input (Tensor): The input tensor representing the audio waveform of shape (T,) or (B, T),
+                                        where B is the batch size and T is the waveform length.
+            bandwidth_id: Bandwidth ID for encoding. If None, defaults to 0 (first bandwidth)
+            **kwargs: Additional arguments
 
         Returns:
             Tensor: The output tensor representing the reconstructed audio waveform of shape (B, T).
         """
-        features, _, _ = self.feature_extractor(audio_input, **kwargs)  # 0818
-        audio_output = self.decode(features, **kwargs)
+        # Ensure audio has batch dimension
+        if audio_input.dim() == 1:
+            audio_input = audio_input.unsqueeze(0)  # (T,) -> (B, T)
+
+        if bandwidth_id is None:
+            bandwidth_id = torch.tensor([0], device=audio_input.device)
+        features, _, _ = self.feature_extractor(audio_input, bandwidth_id=bandwidth_id, **kwargs)  # 0818
+        audio_output = self.decode(features, bandwidth_id=bandwidth_id, **kwargs)
         return audio_output
 
     # 0818
     @torch.inference_mode()
-    def encode(self, audio_input: torch.Tensor, **kwargs: Any) -> torch.Tensor:
-        features, discrete_codes, _ = self.feature_extractor(audio_input, **kwargs)
+    def encode(self, audio_input: torch.Tensor, bandwidth_id: torch.Tensor = None, **kwargs: Any) -> torch.Tensor:
+        """
+        Encode audio to features and discrete codes.
+
+        Args:
+            audio_input: Input audio tensor of shape (T,) or (B, T)
+            bandwidth_id: Bandwidth ID for encoding. If None, defaults to 0 (first bandwidth)
+            **kwargs: Additional arguments
+
+        Returns:
+            Tuple of (features, discrete_codes)
+        """
+        # Ensure audio has batch dimension
+        if audio_input.dim() == 1:
+            audio_input = audio_input.unsqueeze(0)  # (T,) -> (B, T)
+
+        if bandwidth_id is None:
+            bandwidth_id = torch.tensor([0], device=audio_input.device)
+        features, discrete_codes, _ = self.feature_extractor(audio_input, bandwidth_id=bandwidth_id, **kwargs)
         return features, discrete_codes
 
     # 0818
     @torch.inference_mode()
-    def encode_infer(self, audio_input: torch.Tensor, **kwargs: Any) -> torch.Tensor:
+    def encode_infer(self, audio_input: torch.Tensor, bandwidth_id: torch.Tensor = None, **kwargs: Any) -> torch.Tensor:
+        """
+        Encode audio to features and discrete codes using inference mode.
+
+        Args:
+            audio_input: Input audio tensor of shape (T,) or (B, T)
+            bandwidth_id: Bandwidth ID for encoding. If None, defaults to 0 (first bandwidth)
+            **kwargs: Additional arguments
+
+        Returns:
+            Tuple of (features, discrete_codes)
+        """
+        # Ensure audio has batch dimension
+        if audio_input.dim() == 1:
+            audio_input = audio_input.unsqueeze(0)  # (T,) -> (B, T)
+
+        if bandwidth_id is None:
+            bandwidth_id = torch.tensor([0], device=audio_input.device)
         features, discrete_codes, _ = self.feature_extractor.infer(
-            audio_input, **kwargs
+            audio_input, bandwidth_id=bandwidth_id, **kwargs
         )
         return features, discrete_codes
 
     @torch.inference_mode()
-    def decode(self, features_input: torch.Tensor, **kwargs: Any) -> torch.Tensor:
+    def decode(self, features_input: torch.Tensor, bandwidth_id: torch.Tensor = None, **kwargs: Any) -> torch.Tensor:
         """
         Method to decode audio waveform from already calculated features. The features input is passed through
         the backbone and the head to reconstruct the audio output.
@@ -213,11 +322,15 @@ class WavTokenizer(nn.Module):
         Args:
             features_input (Tensor): The input tensor of features of shape (B, C, L), where B is the batch size,
                                      C denotes the feature dimension, and L is the sequence length.
+            bandwidth_id: Bandwidth ID for decoding. If None, defaults to 0 (first bandwidth)
+            **kwargs: Additional arguments
 
         Returns:
             Tensor: The output tensor representing the reconstructed audio waveform of shape (B, T).
         """
-        x = self.backbone(features_input, **kwargs)
+        if bandwidth_id is None:
+            bandwidth_id = torch.tensor([0], device=features_input.device)
+        x = self.backbone(features_input, bandwidth_id=bandwidth_id, **kwargs)
         audio_output = self.head(x)
         return audio_output
 
