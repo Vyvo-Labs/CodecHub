@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from codecplus.codecs.wav_tokenizer.encoder import modules as m
+from codecplus.codecs.wav_tokenizer.encoder.modules.seanet import SEANetEncoder, SEANetDecoder
 from codecplus.codecs.wav_tokenizer.encoder import quantization as qt
 from codecplus.codecs.wav_tokenizer.encoder.utils import (
     _check_checksum,
@@ -93,8 +93,8 @@ class EncodecModel(nn.Module):
 
     def __init__(
         self,
-        encoder: m.SEANetEncoder,
-        decoder: m.SEANetDecoder,
+        encoder: SEANetEncoder,
+        decoder: SEANetDecoder,
         quantizer: qt.ResidualVectorQuantizer,
         target_bandwidths: tp.List[float],
         sample_rate: int,

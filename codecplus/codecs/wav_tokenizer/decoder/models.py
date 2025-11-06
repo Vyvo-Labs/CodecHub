@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import torch
-from decoder.modules import AdaLayerNorm, ConvNeXtBlock, ResBlock1
+from codecplus.codecs.wav_tokenizer.decoder.modules import AdaLayerNorm, ConvNeXtBlock, ResBlock1
 from torch import nn
 from torch.nn.utils import weight_norm
 
