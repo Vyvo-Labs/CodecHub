@@ -6,44 +6,22 @@ def load_codec(model_name, hf_id=None, **kwargs):
     """Load a codec model by name
 
     Args:
-        model_name: Codec model name ('wav_tokenizer', 'dac', 'mimi', 'snac')
-        hf_id: HuggingFace repository ID (required for all models)
-               Format: 'username/repository-name'
-
-               WavTokenizer examples:
-                 - 'Vyvo-Research/WavTokenizer-large-speech-320-v2'
-
-               DAC available models (from Transformers):
-                 - 'descript/dac_16khz' (16kHz)
-                 - 'descript/dac_24khz' (24kHz)
-                 - 'descript/dac_44khz' (44.1kHz)
-
-               Mimi available models (from Transformers):
-                 - 'kyutai/mimi' (24kHz, streaming capable)
-
-               SNAC available models:
-                 - 'hubertsiuzdak/snac_24khz' (24kHz, 0.98 kbps, Speech)
-                 - 'hubertsiuzdak/snac_32khz' (32kHz, 1.9 kbps, Music/SFX)
-                 - 'hubertsiuzdak/snac_44khz' (44kHz, 2.6 kbps, Music/SFX)
-        **kwargs: Additional model-specific parameters (reserved for future use)
+        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi')
+        hf_id: HuggingFace repository ID (for pretrained models)
+        **kwargs: Additional model-specific parameters
 
     Returns:
         Loaded codec model
 
     Examples:
-        # Download WavTokenizer from HuggingFace
-        tokenizer = load_codec('wav_tokenizer',
-                              hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')
+        # WavTokenizer from HuggingFace
+        tokenizer = load_codec('wav_tokenizer', hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')
 
-        # Download DAC from HuggingFace (uses Transformers library)
-        dac = load_codec('dac', hf_id='descript/dac_16khz')
-        dac = load_codec('dac', hf_id='descript/dac_44khz')
+        # LongCat from HuggingFace
+        longcat = load_codec('longcat', hf_id='Vyvo-Research/LongCat-Audio-Codec', variant='24k_4codebooks')
 
-        # Download Mimi from HuggingFace (uses Transformers library)
-        mimi = load_codec('mimi', hf_id='kyutai/mimi')
-
-        # Download SNAC from HuggingFace
-        snac = load_codec('snac', hf_id='hubertsiuzdak/snac_32khz')
+        # DAC (no pretrained yet)
+        dac = load_codec('dac', sample_rate=44100)
     """
     if model_name == "wav_tokenizer":
         from codecplus.codecs.wav_tokenizer.decoder.pretrained import WavTokenizer
@@ -51,62 +29,50 @@ def load_codec(model_name, hf_id=None, **kwargs):
         if hf_id is None:
             raise ValueError(
                 "WavTokenizer requires 'hf_id' parameter.\n"
-                "Examples:\n"
-                "  - load_codec('wav_tokenizer', hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')\n"
-                "  - load_codec('wav_tokenizer', hf_id='username/repo-name')"
+                "Example: load_codec('wav_tokenizer', hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')"
             )
-
         return WavTokenizer.from_pretrained(repo_id=hf_id)
 
     elif model_name == "dac":
         from codecplus.codecs.dac import DAC
 
-        if hf_id is None:
+        if hf_id:
+            # Future: DAC from HuggingFace
+            raise NotImplementedError("DAC from_pretrained not yet implemented")
+        return DAC(**kwargs)
+
+    elif model_name == "longcat":
+        from codecplus.codecs.longcat import LongCatCodec
+
+        if hf_id:
+            # Load from HuggingFace
+            # Extract variant if provided (default to 24k_4codebooks)
+            variant = kwargs.pop('variant', kwargs.pop('model_name', '24k_4codebooks'))
+            return LongCatCodec.from_pretrained(hf_id=hf_id, model_name=variant, **kwargs)
+
+        # Load from local configs
+        required_params = ['encoder_config', 'decoder_config']
+        missing = [p for p in required_params if p not in kwargs]
+        if missing:
             raise ValueError(
-                "DAC requires 'hf_id' parameter.\n"
-                "Available models:\n"
-                "  - 'descript/dac_16khz' (16kHz)\n"
-                "  - 'descript/dac_24khz' (24kHz)\n"
-                "  - 'descript/dac_44khz' (44.1kHz)\n"
+                f"LongCat requires either 'hf_id' or {', '.join(missing)}.\n"
                 "Examples:\n"
-                "  - load_codec('dac', hf_id='descript/dac_16khz')\n"
-                "  - load_codec('dac', hf_id='descript/dac_44khz')"
+                "  - load_codec('longcat', hf_id='Vyvo-Research/LongCat-Audio-Codec', variant='24k_4codebooks')\n"
+                "  - load_codec('longcat', encoder_config='...', decoder_config='...')"
             )
-
-        return DAC.from_pretrained(repo_id=hf_id)
-
-    elif model_name == "mimi":
-        from codecplus.codecs.mimi import Mimi
-
-        if hf_id is None:
-            raise ValueError(
-                "Mimi requires 'hf_id' parameter.\n"
-                "Available models:\n"
-                "  - 'kyutai/mimi' (24kHz, streaming capable)\n"
-                "Examples:\n"
-                "  - load_codec('mimi', hf_id='kyutai/mimi')"
-            )
-
-        return Mimi.from_pretrained(repo_id=hf_id)
+        return LongCatCodec(**kwargs)
 
     elif model_name == "snac":
-        from codecplus.codecs.snac import SNAC
+        # Placeholder for SNAC
+        if hf_id:
+            raise NotImplementedError("SNAC from_pretrained not yet implemented")
+        raise NotImplementedError("SNAC codec not yet implemented")
 
-        if hf_id is None:
-            raise ValueError(
-                "SNAC requires 'hf_id' parameter.\n"
-                "Available models:\n"
-                "  - 'hubertsiuzdak/snac_24khz' (24kHz, 0.98 kbps, Speech)\n"
-                "  - 'hubertsiuzdak/snac_32khz' (32kHz, 1.9 kbps, Music/SFX)\n"
-                "  - 'hubertsiuzdak/snac_44khz' (44kHz, 2.6 kbps, Music/SFX)\n"
-                "Examples:\n"
-                "  - load_codec('snac', hf_id='hubertsiuzdak/snac_32khz')\n"
-                "  - load_codec('snac', hf_id='hubertsiuzdak/snac_24khz')"
-            )
-
-        # Extract device from kwargs if provided
-        device = kwargs.get('device', None)
-        return SNAC.from_pretrained(repo_id=hf_id, device=device)
+    elif model_name == "mimi":
+        # Placeholder for Mimi
+        if hf_id:
+            raise NotImplementedError("Mimi from_pretrained not yet implemented")
+        raise NotImplementedError("Mimi codec not yet implemented")
 
     else:
-        raise ValueError(f"Unknown codec: {model_name}")
+        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi")
