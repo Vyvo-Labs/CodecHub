@@ -79,21 +79,6 @@ latents = dac.encode(audio)
 output = dac.decode(latents)
 ```
 
-## Supported Codecs
-
-| Codec | HF Repository | Sample Rates | Description |
-|-------|---------------|--------------|-------------|
-| **WavTokenizer** | `Vyvo-Research/WavTokenizer-*` | 24kHz | High-fidelity, transformer-based |
-| **LongCat** | `Vyvo-Research/LongCat-Audio-Codec` | 16/24kHz | Dual-path (semantic+acoustic), ultra-low bitrate |
-| **DAC** | - | 16/24/44.1kHz | Low-latency compression |
-| **SNAC** | Coming soon | - | - |
-| **Mimi** | Coming soon | - | - |
-
-### Download & Cache
-
-Models are automatically downloaded from HuggingFace and cached in `~/.cache/codecplus/{codec_name}/`
-
-
 ## 🙏 Acknowledgements
 
 We would like to thank the following projects and teams that made this work possible:
