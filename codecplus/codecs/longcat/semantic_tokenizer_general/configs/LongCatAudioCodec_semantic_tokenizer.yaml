@@ -1,0 +1,8 @@
+semantic_tokenizer_config:
+    select_layer: 26
+    codebook_dim: 1280
+    codebook_size: 8192
+    sample_rate : 16000
+    model_config: semantic_tokenizer_general/configs/semantic_tokenizer.infer.yaml
+
+

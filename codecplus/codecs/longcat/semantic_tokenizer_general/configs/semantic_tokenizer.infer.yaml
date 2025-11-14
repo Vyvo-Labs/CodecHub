@@ -1,0 +1,34 @@
+delta_order: 0
+encoder:
+  VGGtf_encoder:
+    activation: gelu
+    conv2d_stride: 2,3
+    d_model: 1280
+    delta_order: 0
+    dim_feedforward: 5120
+    dropout: 0.0
+    feat_dim: 80
+    layer_drop: 0.0
+    left: 0
+    nhead: 20
+    num_conv_layers: 2
+    num_encoder_layers: 26
+    right: 0
+    stride: 1
+    subsampling: conv2d
+  type: VGGtf_encoder
+feat_dim: 80
+feature:
+  cmvn_file: /home/ubuntu/.cache/codecplus/longcat/models--Vyvo-Research--LongCat-Audio-Codec/snapshots/386f95ec487bc942b17ff0ac4b5df27cf09e1ba8/ckpts/LongCatAudioCodec_encoder_cmvn.npy
+  fbank:
+    dither: 0.0
+    frame_length: 25
+    frame_shift: 10
+    freq: 16000
+    high_freq: -200
+    low_freq: 40
+    num_mel_bins: 80
+    preemphasis: 0.97
+left: 0
+right: 0
+stride: 1

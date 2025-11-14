@@ -32,7 +32,7 @@ uv pip install -e .
 
 ## Usage
 
-### WavTokenizer Codec
+All codecs support loading from HuggingFace with `hf_id` parameter:
 
 ```python
 from codecplus import load_codec
@@ -40,26 +40,58 @@ from codecplus.utils import load_audio, save_audio
 
 # Load audio
 audio, sr = load_audio('input.wav')
+```
 
-# Download and load WavTokenizer from HuggingFace
-tokenizer = load_codec(model_name='wav_tokenizer', hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')
+### WavTokenizer
+
+```python
+# Load from HuggingFace
+tokenizer = load_codec('wav_tokenizer', hf_id='Vyvo-Research/WavTokenizer-large-speech-320-v2')
 
 # Encode and decode
 features, discrete_codes = tokenizer.encode(audio)
 output = tokenizer.decode(features)
-
-# Save output
 save_audio(output, 'output.wav', sr)
 ```
+
+### LongCat Audio Codec
+
+```python
+# Load from HuggingFace (auto-downloads and caches)
+longcat = load_codec('longcat', hf_id='Vyvo-Research/LongCat-Audio-Codec', variant='24k_4codebooks')
+
+# Encode to semantic and acoustic tokens
+semantic_codes, acoustic_codes = longcat.encode(audio, sr)
+
+# Decode back to audio
+output = longcat.decode(semantic_codes, acoustic_codes)
+save_audio(output, 'output.wav', longcat.sample_rate)
+```
+
+**Available models**: `16k_4codebooks`, `24k_2codebooks`, `24k_4codebooks`, `24k_4codebooks_aug_sft`
 
 ### DAC Codec
 
 ```python
-# Load DAC codec
+# Load DAC (local only for now)
 dac = load_codec('dac', sample_rate=44100)
 latents = dac.encode(audio)
 output = dac.decode(latents)
 ```
+
+## Supported Codecs
+
+| Codec | HF Repository | Sample Rates | Description |
+|-------|---------------|--------------|-------------|
+| **WavTokenizer** | `Vyvo-Research/WavTokenizer-*` | 24kHz | High-fidelity, transformer-based |
+| **LongCat** | `Vyvo-Research/LongCat-Audio-Codec` | 16/24kHz | Dual-path (semantic+acoustic), ultra-low bitrate |
+| **DAC** | - | 16/24/44.1kHz | Low-latency compression |
+| **SNAC** | Coming soon | - | - |
+| **Mimi** | Coming soon | - | - |
+
+### Download & Cache
+
+Models are automatically downloaded from HuggingFace and cached in `~/.cache/codecplus/{codec_name}/`
 
 
 ## 🙏 Acknowledgements
@@ -68,6 +100,7 @@ We would like to thank the following projects and teams that made this work poss
 
 - [WavTokenizer](https://github.com/jishengpeng/WavTokenizer)
 - [DAC](https://github.com/descriptinc/descript-audio-codec)
+- [LongCat Audio Codec](https://github.com/meituan-longcat/LongCat-Audio-Codec)
 
 ## 📄 License
 
