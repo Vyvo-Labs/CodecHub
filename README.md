@@ -79,6 +79,62 @@ latents = dac.encode(audio)
 output = dac.decode(latents)
 ```
 
+### SNAC (Multi-Scale Neural Audio Codec)
+
+```python
+# Load from HuggingFace
+snac = load_codec('snac', hf_id='hubertsiuzdak/snac_32khz')
+
+# Encode to multi-scale discrete codes
+codes = snac.encode(audio)
+
+# Decode back to audio
+output = snac.decode(codes)
+save_audio(output, 'output.wav', snac.sampling_rate)
+```
+
+**Available models**:
+- `hubertsiuzdak/snac_24khz` (24kHz, 0.98 kbps, Speech)
+- `hubertsiuzdak/snac_32khz` (32kHz, 1.9 kbps, Music/SFX)
+- `hubertsiuzdak/snac_44khz` (44kHz, 2.6 kbps, Music/SFX)
+
+### Mimi
+
+```python
+# Load from HuggingFace
+mimi = load_codec('mimi', hf_id='kyutai/mimi')
+
+# Encode to audio codes and semantic codes
+audio_codes, semantic_codes = mimi.encode(audio, sample_rate=sr)
+
+# Decode back to audio
+output = mimi.decode(audio_codes)
+save_audio(output, 'output.wav', mimi.sampling_rate)
+
+# Get only semantic tokens
+semantic_tokens = mimi.get_semantic_tokens(audio, sample_rate=sr)
+```
+
+**Available models**: `kyutai/mimi` (24kHz, streaming capable)
+
+### XCodec2
+
+```python
+# Load from HuggingFace
+xcodec2 = load_codec('xcodec2', hf_id='NandemoGHS/Anime-XCodec2-44.1kHz-v2')
+
+# Encode to VQ codes (requires 16kHz audio input)
+vq_code = xcodec2.encode(audio)
+
+# Decode back to audio
+output = xcodec2.decode(vq_code)
+save_audio(output, 'output.wav', 44100)  # Output is 44.1kHz for this model
+```
+
+**Available models**:
+- `NandemoGHS/Anime-XCodec2-44.1kHz-v2` (44.1kHz output, fine-tuned for anime speech)
+- `HKUSTAudio/xcodec2` (16kHz, base speech model)
+
 ## 🙏 Acknowledgements
 
 We would like to thank the following projects and teams that made this work possible:
@@ -86,6 +142,9 @@ We would like to thank the following projects and teams that made this work poss
 - [WavTokenizer](https://github.com/jishengpeng/WavTokenizer)
 - [DAC](https://github.com/descriptinc/descript-audio-codec)
 - [LongCat Audio Codec](https://github.com/meituan-longcat/LongCat-Audio-Codec)
+- [SNAC](https://github.com/hubertsiuzdak/snac)
+- [Mimi](https://github.com/kyutai-labs/mimi)
+- [XCodec2](https://github.com/HKUSTAudio/xcodec2)
 
 ## 📄 License
 
