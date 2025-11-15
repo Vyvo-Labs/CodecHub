@@ -6,7 +6,7 @@ def load_codec(model_name, hf_id=None, **kwargs):
     """Load a codec model by name
 
     Args:
-        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi')
+        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi', 'xcodec2')
         hf_id: HuggingFace repository ID (for pretrained models)
         **kwargs: Additional model-specific parameters
 
@@ -19,6 +19,15 @@ def load_codec(model_name, hf_id=None, **kwargs):
 
         # LongCat from HuggingFace
         longcat = load_codec('longcat', hf_id='Vyvo-Research/LongCat-Audio-Codec', variant='24k_4codebooks')
+
+        # SNAC from HuggingFace
+        snac = load_codec('snac', hf_id='hubertsiuzdak/snac_32khz')
+
+        # Mimi from HuggingFace
+        mimi = load_codec('mimi', hf_id='kyutai/mimi')
+
+        # XCodec2 from HuggingFace
+        xcodec2 = load_codec('xcodec2', hf_id='NandemoGHS/Anime-XCodec2-44.1kHz-v2')
 
         # DAC (no pretrained yet)
         dac = load_codec('dac', sample_rate=44100)
@@ -63,16 +72,51 @@ def load_codec(model_name, hf_id=None, **kwargs):
         return LongCatCodec(**kwargs)
 
     elif model_name == "snac":
-        # Placeholder for SNAC
+        from codecplus.codecs.snac import SNAC
+
         if hf_id:
-            raise NotImplementedError("SNAC from_pretrained not yet implemented")
-        raise NotImplementedError("SNAC codec not yet implemented")
+            # Load from HuggingFace
+            device = kwargs.pop('device', None)
+            return SNAC.from_pretrained(repo_id=hf_id, device=device)
+
+        raise ValueError(
+            "SNAC requires 'hf_id' parameter.\n"
+            "Example: load_codec('snac', hf_id='hubertsiuzdak/snac_32khz')\n"
+            "Available models:\n"
+            "  - 'hubertsiuzdak/snac_24khz' (24kHz, 0.98 kbps, Speech)\n"
+            "  - 'hubertsiuzdak/snac_32khz' (32kHz, 1.9 kbps, Music/SFX)\n"
+            "  - 'hubertsiuzdak/snac_44khz' (44kHz, 2.6 kbps, Music/SFX)"
+        )
 
     elif model_name == "mimi":
-        # Placeholder for Mimi
+        from codecplus.codecs.mimi import Mimi
+
         if hf_id:
-            raise NotImplementedError("Mimi from_pretrained not yet implemented")
-        raise NotImplementedError("Mimi codec not yet implemented")
+            # Load from HuggingFace
+            return Mimi.from_pretrained(repo_id=hf_id)
+
+        raise ValueError(
+            "Mimi requires 'hf_id' parameter.\n"
+            "Example: load_codec('mimi', hf_id='kyutai/mimi')\n"
+            "Available models:\n"
+            "  - 'kyutai/mimi' (24kHz, streaming capable)"
+        )
+
+    elif model_name == "xcodec2":
+        from codecplus.codecs.xcodec2 import XCodec2
+
+        if hf_id:
+            # Load from HuggingFace
+            device = kwargs.pop('device', None)
+            return XCodec2.from_pretrained(repo_id=hf_id, device=device)
+
+        raise ValueError(
+            "XCodec2 requires 'hf_id' parameter.\n"
+            "Example: load_codec('xcodec2', hf_id='NandemoGHS/Anime-XCodec2-44.1kHz-v2')\n"
+            "Available models:\n"
+            "  - 'NandemoGHS/Anime-XCodec2-44.1kHz-v2' (44.1kHz, anime speech)\n"
+            "  - 'HKUSTAudio/xcodec2' (16kHz, speech)"
+        )
 
     else:
-        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi")
+        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi, xcodec2")
