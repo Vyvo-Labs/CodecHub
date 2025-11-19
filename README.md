@@ -58,8 +58,7 @@ save_audio(output, 'output.wav', sr)
 
 ```python
 # Load from HuggingFace (auto-downloads and caches)
-longcat = load_codec('longcat', hf_id='Vyvo-Research/LongCat-Audio-Codec', variant='24k_4codebooks')
-
+longcat = load_codec('longcat', hf_id='Vyvo-Research/LongCat-Audio-Codec', variant='24k_4codebooks') # `16k_4codebooks`, `24k_2codebooks`, `24k_4codebooks`, `24k_4codebooks_aug_sft`
 # Encode to semantic and acoustic tokens
 semantic_codes, acoustic_codes = longcat.encode(audio, sr)
 
@@ -67,8 +66,6 @@ semantic_codes, acoustic_codes = longcat.encode(audio, sr)
 output = longcat.decode(semantic_codes, acoustic_codes)
 save_audio(output, 'output.wav', longcat.sample_rate)
 ```
-
-**Available models**: `16k_4codebooks`, `24k_2codebooks`, `24k_4codebooks`, `24k_4codebooks_aug_sft`
 
 ### DAC Codec
 
@@ -93,11 +90,6 @@ output = snac.decode(codes)
 save_audio(output, 'output.wav', snac.sampling_rate)
 ```
 
-**Available models**:
-- `hubertsiuzdak/snac_24khz` (24kHz, 0.98 kbps, Speech)
-- `hubertsiuzdak/snac_32khz` (32kHz, 1.9 kbps, Music/SFX)
-- `hubertsiuzdak/snac_44khz` (44kHz, 2.6 kbps, Music/SFX)
-
 ### Mimi
 
 ```python
@@ -115,8 +107,6 @@ save_audio(output, 'output.wav', mimi.sampling_rate)
 semantic_tokens = mimi.get_semantic_tokens(audio, sample_rate=sr)
 ```
 
-**Available models**: `kyutai/mimi` (24kHz, streaming capable)
-
 ### XCodec2
 
 ```python
@@ -131,9 +121,21 @@ output = xcodec2.decode(vq_code)
 save_audio(output, 'output.wav', 44100)  # Output is 44.1kHz for this model
 ```
 
-**Available models**:
-- `NandemoGHS/Anime-XCodec2-44.1kHz-v2` (44.1kHz output, fine-tuned for anime speech)
-- `HKUSTAudio/xcodec2` (16kHz, base speech model)
+### Higgs Audio
+
+```python
+# Load from HuggingFace
+higgs = load_codec('higgs_audio', hf_id='bosonai/higgs-audio-v2-tokenizer')
+
+# Encode audio to VQ codes
+vq_codes = higgs.encode(audio, sr=sr)
+
+# Decode VQ codes back to audio
+reconstructed = higgs.decode(vq_codes)
+
+# Save the reconstructed audio
+higgs.save_audio(reconstructed, 'output.wav')
+```
 
 ## 🙏 Acknowledgements
 
@@ -145,6 +147,7 @@ We would like to thank the following projects and teams that made this work poss
 - [SNAC](https://github.com/hubertsiuzdak/snac)
 - [Mimi](https://github.com/kyutai-labs/mimi)
 - [XCodec2](https://github.com/HKUSTAudio/xcodec2)
+- [Higgs Audio](https://github.com/bosonai/higgs-audio)
 
 ## 📄 License
 
