@@ -6,7 +6,7 @@ def load_codec(model_name, hf_id=None, **kwargs):
     """Load a codec model by name
 
     Args:
-        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi', 'xcodec2')
+        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi', 'xcodec2', 'higgs_audio')
         hf_id: HuggingFace repository ID (for pretrained models)
         **kwargs: Additional model-specific parameters
 
@@ -28,6 +28,9 @@ def load_codec(model_name, hf_id=None, **kwargs):
 
         # XCodec2 from HuggingFace
         xcodec2 = load_codec('xcodec2', hf_id='NandemoGHS/Anime-XCodec2-44.1kHz-v2')
+
+        # Higgs Audio from HuggingFace
+        higgs = load_codec('higgs_audio', hf_id='bosonai/higgs-audio-v2-tokenizer')
 
         # DAC (no pretrained yet)
         dac = load_codec('dac', sample_rate=44100)
@@ -118,5 +121,24 @@ def load_codec(model_name, hf_id=None, **kwargs):
             "  - 'HKUSTAudio/xcodec2' (16kHz, speech)"
         )
 
+    elif model_name == "higgs_audio":
+        from codecplus.codecs.higgs_audio import HiggsAudio
+
+        tokenizer_path = kwargs.pop('tokenizer_path', hf_id)
+
+        if tokenizer_path is None:
+            raise ValueError(
+                "Higgs Audio requires 'tokenizer_path' or 'hf_id' parameter.\n"
+                "Example: load_codec('higgs_audio', hf_id='bosonai/higgs-audio-v2-tokenizer')\n"
+                "Or: load_codec('higgs_audio', tokenizer_path='bosonai/higgs-audio-v2-tokenizer')\n"
+                "Available models:\n"
+                "  - 'bosonai/higgs-audio-v2-tokenizer' (16kHz)"
+            )
+
+        return HiggsAudio.from_pretrained(
+            tokenizer_path=tokenizer_path,
+            **kwargs
+        )
+
     else:
-        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi, xcodec2")
+        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi, xcodec2, higgs_audio")
