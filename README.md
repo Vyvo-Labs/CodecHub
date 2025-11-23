@@ -137,6 +137,39 @@ reconstructed = higgs.decode(vq_codes)
 higgs.save_audio(reconstructed, 'output.wav')
 ```
 
+### TaDiCodec
+
+```python
+# Load from HuggingFace
+tadicodec = load_codec('tadicodec', hf_id='amphion/TaDiCodec')
+
+# Simple reconstruction (audio input -> audio output)
+reconstructed = tadicodec.forward(
+    audio='input.wav',
+    text='The spoken text content'  # Optional but improves quality
+)
+
+# With speaker prompt for voice cloning
+reconstructed = tadicodec.forward(
+    audio='target.wav',
+    text='Hello world',
+    prompt_audio='speaker_reference.wav',
+    prompt_text='The reference text'
+)
+
+# Encode and decode separately
+codes = tadicodec.encode(audio='input.wav', text='The text')
+audio = tadicodec.decode(codes, text='The text')
+
+# Save output
+tadicodec.save_audio(reconstructed, 'output.wav')
+
+# Model properties
+print(f"Sampling rate: {tadicodec.sampling_rate} Hz")  # 24000 Hz
+print(f"Frame rate: {tadicodec.frame_rate} Hz")       # 6.25 Hz
+print(f"Bitrate: {tadicodec.bitrate} kbps")           # 0.0875 kbps
+```
+
 ## 🙏 Acknowledgements
 
 We would like to thank the following projects and teams that made this work possible:
@@ -148,6 +181,7 @@ We would like to thank the following projects and teams that made this work poss
 - [Mimi](https://github.com/kyutai-labs/mimi)
 - [XCodec2](https://github.com/HKUSTAudio/xcodec2)
 - [Higgs Audio](https://github.com/bosonai/higgs-audio)
+- [TaDiCodec](https://github.com/AmphionTeam/Diffusion-Speech-Tokenizer)
 
 ## 📄 License
 

@@ -6,7 +6,7 @@ def load_codec(model_name, hf_id=None, **kwargs):
     """Load a codec model by name
 
     Args:
-        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi', 'xcodec2', 'higgs_audio')
+        model_name: Codec model name ('wav_tokenizer', 'dac', 'longcat', 'snac', 'mimi', 'xcodec2', 'higgs_audio', 'tadicodec')
         hf_id: HuggingFace repository ID (for pretrained models)
         **kwargs: Additional model-specific parameters
 
@@ -31,6 +31,9 @@ def load_codec(model_name, hf_id=None, **kwargs):
 
         # Higgs Audio from HuggingFace
         higgs = load_codec('higgs_audio', hf_id='bosonai/higgs-audio-v2-tokenizer')
+
+        # TaDiCodec from HuggingFace
+        tadicodec = load_codec('tadicodec', hf_id='amphion/TaDiCodec')
 
         # DAC (no pretrained yet)
         dac = load_codec('dac', sample_rate=44100)
@@ -140,5 +143,21 @@ def load_codec(model_name, hf_id=None, **kwargs):
             **kwargs
         )
 
+    elif model_name == "tadicodec":
+        from codecplus.codecs.tadicodec import TaDiCodec
+
+        model_path = kwargs.pop('model_path', hf_id)
+
+        if model_path is None:
+            # Default to official HuggingFace model
+            model_path = 'amphion/TaDiCodec'
+
+        device = kwargs.pop('device', None)
+
+        return TaDiCodec.from_pretrained(
+            model_path=model_path,
+            device=device if device else ('cuda' if __import__('torch').cuda.is_available() else 'cpu')
+        )
+
     else:
-        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi, xcodec2, higgs_audio")
+        raise ValueError(f"Unknown codec: {model_name}. Available: wav_tokenizer, dac, longcat, snac, mimi, xcodec2, higgs_audio, tadicodec")
