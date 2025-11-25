@@ -8,6 +8,13 @@ class DAC:
         self.model = None
         self.processor = None
 
+    @property
+    def sample_rate(self):
+        """Get the model's sample rate from the processor."""
+        if self.processor is None:
+            raise RuntimeError("Model not loaded. Use DAC.from_pretrained() to load a model.")
+        return self.processor.sampling_rate
+
     @classmethod
     def from_pretrained(cls, repo_id: str) -> "DAC":
         """

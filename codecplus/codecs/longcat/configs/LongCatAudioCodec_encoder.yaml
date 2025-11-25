@@ -1,0 +1,13 @@
+codec_config:
+  input_sample_rate: 16000 
+  codec_dimension: 1024
+  codec_codebook_size: 90
+  codec_enc_ratios: [4,5,6,8] 
+  encoder_dim: 64
+  codec_codebook_search_dim: 8 
+  codec_codebooks: 3
+  semantic_tokenizer_type: 'LongCatAudioCodec_semantic_tokenizer'
+  semantic_token_nums: 8192
+  semantic_dim: 1280
+
+  ckpt_path: 'ckpts/LongCatAudioCodec_encoder.pt'

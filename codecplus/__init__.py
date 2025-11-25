@@ -35,8 +35,8 @@ def load_codec(model_name, hf_id=None, **kwargs):
         # TaDiCodec from HuggingFace
         tadicodec = load_codec('tadicodec', hf_id='amphion/TaDiCodec')
 
-        # DAC (no pretrained yet)
-        dac = load_codec('dac', sample_rate=44100)
+        # DAC from HuggingFace
+        dac = load_codec('dac', hf_id='descript/dac_44khz')
     """
     if model_name == "wav_tokenizer":
         from codecplus.codecs.wav_tokenizer.decoder.pretrained import WavTokenizer
@@ -52,8 +52,7 @@ def load_codec(model_name, hf_id=None, **kwargs):
         from codecplus.codecs.dac import DAC
 
         if hf_id:
-            # Future: DAC from HuggingFace
-            raise NotImplementedError("DAC from_pretrained not yet implemented")
+            return DAC.from_pretrained(repo_id=hf_id)
         return DAC(**kwargs)
 
     elif model_name == "longcat":
