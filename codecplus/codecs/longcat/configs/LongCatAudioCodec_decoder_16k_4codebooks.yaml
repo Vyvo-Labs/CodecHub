@@ -1,0 +1,11 @@
+codec_config:
+  codec_dimension: 1024
+  codec_dec_ratios: [8,6,5,4]
+  decoder_dim: 1536
+  semantic_dim: 1280
+  decoder_type: '16k'
+  ckpt_path: 'ckpts/LongCatAudioCodec_decoder_16k_4codebooks.pt'
+  codec_codebook_size: 90
+  codec_codebook_search_dim: 8 
+  codec_codebooks: 3
+  semantic_token_nums: 8192

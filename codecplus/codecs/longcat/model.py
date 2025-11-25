@@ -385,9 +385,9 @@ class LongCatCodec(nn.Module):
         )
 
         # Get config paths
-        module_dir = Path(__file__).parent.parent.parent.parent
-        encoder_config_path = module_dir / f"configs/longcat/LongCatAudioCodec_encoder.yaml"
-        decoder_config_path = module_dir / f"configs/longcat/LongCatAudioCodec_decoder_{model_name}.yaml"
+        module_dir = Path(__file__).parent
+        encoder_config_path = module_dir / "configs/LongCatAudioCodec_encoder.yaml"
+        decoder_config_path = module_dir / f"configs/LongCatAudioCodec_decoder_{model_name}.yaml"
 
         # Load and update configs
         with open(encoder_config_path, 'r') as f:
@@ -399,7 +399,7 @@ class LongCatCodec(nn.Module):
         decoder_config['codec_config']['ckpt_path'] = decoder_ckpt
 
         # Update semantic tokenizer CMVN path
-        semantic_config_path = module_dir / "codecplus/codecs/longcat/semantic_tokenizer_general/configs/semantic_tokenizer.infer.yaml"
+        semantic_config_path = module_dir / "semantic_tokenizer_general/configs/semantic_tokenizer.infer.yaml"
         if semantic_config_path.exists():
             with open(semantic_config_path, 'r') as f:
                 semantic_cfg = yaml.safe_load(f)

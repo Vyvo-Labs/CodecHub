@@ -19,7 +19,7 @@ encoder:
   type: VGGtf_encoder
 feat_dim: 80
 feature:
-  cmvn_file: /home/ubuntu/.cache/codecplus/longcat/models--Vyvo-Research--LongCat-Audio-Codec/snapshots/386f95ec487bc942b17ff0ac4b5df27cf09e1ba8/ckpts/LongCatAudioCodec_encoder_cmvn.npy
+  cmvn_file: /home/ubuntu/.cache/codecplus/longcat/models--Vyvo-Research--LongCat-Audio-Codec/snapshots/2238eaef70f16d93f690ef62a1b4363df6573eef/ckpts/LongCatAudioCodec_encoder_cmvn.npy
   fbank:
     dither: 0.0
     frame_length: 25
