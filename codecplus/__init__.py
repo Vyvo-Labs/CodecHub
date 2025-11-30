@@ -144,7 +144,7 @@ def load_codec(model_name, hf_id=None, **kwargs):
         )
 
     elif model_name == "tadicodec":
-        from codecplus.codecs.tadicodec import TaDiCodec
+        from codecplus.pipelines.tadicodec import TaDiCodec
 
         model_path = kwargs.pop('model_path', hf_id)
 

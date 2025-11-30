@@ -1,3 +1,3 @@
-from .model import TaDiCodec
+from codecplus.codecs.tadicodec.models.tts.tadicodec.inference_tadicodec import TaDiCodecPipline
 
-__all__ = ["TaDiCodec"]
+__all__ = ['TaDiCodecPipline']
